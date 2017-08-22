@@ -3,8 +3,8 @@ require File.expand_path("./querizer", File.dirname(__FILE__))
 
 module Querizer
   class Pg < Querizer
-    def initialize(conf={}, option={})
-      super(conf, option)
+    def initialize conf={}, option={}
+      super conf, option
       @conf = {
        :host => conf[:host] || "localhost",
        :user => conf[:user] || "postgres",
@@ -12,14 +12,14 @@ module Querizer
        :dbname => conf[:dbname] || "test",
        :port => conf[:port] || 5432,
       }
-      @conn = PG::connect(@conf)
+      @conn = PG::connect @conf
     end
 
-    def exec(query, param)
+    def exec query, param={}
       query, _param = *trans_placeholder(query, param)
       p query
       p _param
-      return @conn.exec(query, _param)
+      return @conn.exec query, _param
     end
 
     def tran
@@ -35,7 +35,7 @@ module Querizer
 
     private
 
-    def trans_placeholder(query, param)#=> [query, param]
+    def trans_placeholder query, param#=> [query, param]
       index = 0
       _param = []
       _query = query.gsub(/:\w+/m){|m|
