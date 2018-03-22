@@ -12,7 +12,7 @@ module Querizer
     #   :tables => ["table_name", ...],
     #   :save => boolean,
     # }
-    def initialize(conf={}, option={})#=> nil
+    def initialize conf={}, option={} #=> nil
       @conf = conf
       @dir = option[:querize_dir] || "queries"
       @tables = option[:tables] || []
@@ -22,7 +22,7 @@ module Querizer
     end
 
     #abstract method
-    def exec(query, params)
+    def exec query, params={}
       raise RuntimeError.new("'exec' is abstract method.")
     end
 
@@ -31,7 +31,7 @@ module Querizer
       raise RuntimeError.new("'tran' is abstract method.")
     end
 
-    def method_missing(method, *args)
+    def method_missing method, *args
       table = method.to_s
       super unless @tables.include?(table)
       if !@cache[table] then
