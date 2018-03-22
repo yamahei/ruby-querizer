@@ -1,21 +1,19 @@
-require "../querizer/pg"
-require "pg"
+require "../querizer/sqlite"
+require "sqlite3"
 
+file = File.expand_path("./test.sqlite")
+File.delete(file) if File.exist?(file)
 conf = {
-  :host => "localhost",
-  :user => "postgres",
-  :password => "postgres",
-  :dbname => "test",
-  :port => 5432,
+	:file => file,
 }
-dir = "pg_test_queries"
+dir = "sqlite3_test_queries"
 option = {
   :querize_dir => dir,
   :tables => "parent,child".split(","),
   :save => true,
   :debug => true,
 }
-PG::connect(conf).exec <<-"EOD"
+SQLite3::Database.new(file).execute_batch <<-"EOD"
   DROP VIEW IF EXISTS list;
   DROP TABLE IF EXISTS child;
   DROP TABLE IF EXISTS parent;
@@ -33,16 +31,16 @@ PG::connect(conf).exec <<-"EOD"
     at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(parent, id)
   );
-  CREATE OR REPLACE VIEW list AS(
+  CREATE VIEW list AS
     SELECT p.id AS parent_id, c.id AS child_id,
       p.num, p.category, c.attribute, c.value
     FROM parent AS p
     LEFT JOIN child AS c ON p.id = c.parent
     ORDER BY p.at, c.at
-  );
+  ;
 EOD
 
-q = Querizer::Pg.new(conf, option)
+q = Querizer::Sqlite.new(conf, option)
 
 load "./querizerTest.rb"
 test(q, dir)
