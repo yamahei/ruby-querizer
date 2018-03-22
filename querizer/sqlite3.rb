@@ -12,8 +12,6 @@ module Querizer
     end
 
     def exec query, param={}
-      p query
-      p param
       return @conn.execute query, param
     end
 
