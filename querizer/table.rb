@@ -1,11 +1,12 @@
 module Querizer
   class Table
-    def initialize(name, querizer, dir, save)
+    def initialize(name, querizer, dir, save, debug=false)
       @name = name
       @db = querizer
       @dir = File.join(dir, name)
       FileUtils.mkdir_p(@dir)
       @save = save
+      @debug = debug
       @cache = {}
     end
 
@@ -17,6 +18,7 @@ module Querizer
         INSERT INTO #{@name} ( #{fields.join(", ")} )
         VALUES ( #{values.join(", ")} )
       EOQ
+      __trace("insert", {:record=>record,:query=>query}) if @debug
       @db.exec(query, record)
     end
 
@@ -34,6 +36,7 @@ module Querizer
         SET #{sets.join(", ")}
         #{where(record)}
       EOQ
+      __trace("update", {:record=>record,:sets=>sets,:query=>query}) if @debug
       @db.exec(query, _params)
     end
 
@@ -43,6 +46,7 @@ module Querizer
         DELETE FROM #{@name}
         #{where(record)}
       EOQ
+      __trace("delete", {:record=>record,:query=>query}) if @debug
       @db.exec(query, record)
     end
 
@@ -71,6 +75,7 @@ module Querizer
         end
       end
       @cache[command] = query
+      __trace("__selector", {:command=>command,:where=>where,:query=>query}) if @debug
       @db.exec(query, where)
     end
 
@@ -127,6 +132,7 @@ module Querizer
       return false unless query
       query += where(params) if params.length > 0
       query += order_by(order) if order.length > 0
+      __trace("__selector", {:command=>command,:params=>params,:query=>query}) if @debug
       @db.exec(query, params)
     end
 
@@ -149,6 +155,15 @@ module Querizer
       return @cache[file] if @cache[file]
       return false unless File.exists?(file)
       @cache[file] = File.open{|f| f.read}
+    end
+    
+    def __trace(method, params)
+    	puts; puts "[debug]#{method}"
+    	params.each{|key, value|
+    		puts "** #{key}"
+    		p value
+    		puts "----"
+    	}
     end
   end
 end

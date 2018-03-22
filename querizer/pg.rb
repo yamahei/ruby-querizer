@@ -17,8 +17,6 @@ module Querizer
 
     def exec(query, param)
       query, _param = *trans_placeholder(query, param)
-      p query
-      p _param
       return @conn.exec(query, _param)
     end
 

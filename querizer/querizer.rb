@@ -17,6 +17,7 @@ module Querizer
       @dir = option[:querize_dir] || "queries"
       @tables = option[:tables] || []
       @save = option[:save] || true
+      @debug = option[:debug] || false
       @cache = {}
     end
 
@@ -34,7 +35,7 @@ module Querizer
       table = method.to_s
       super unless @tables.include?(table)
       if !@cache[table] then
-        @cache[table] = Table.new(table, self, @dir, @save)
+        @cache[table] = Table.new(table, self, @dir, @save, @debug)
       end
       @cache[table]
     end
