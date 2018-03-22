@@ -7,8 +7,13 @@ module Querizer
       super conf, option
       @conf = {
        :file => conf[:file] || File.expand_path("./data.sqlite3"),
+       :ddl => conf[:ddl] || "",
       }
+      create? = !File.exist?(@conf[:file]) && !@conf[:ddl].empty?
       @conn = SQLite3::Database.new @conf[:file]
+      if create? then
+        db.execute @conf[:ddl]
+      end
     end
 
     def exec query, param={}
