@@ -9,9 +9,9 @@ module Querizer
        :file => conf[:file] || File.expand_path("./data.sqlite3"),
        :ddl => conf[:ddl] || "",
       }
-      create? = !File.exist?(@conf[:file]) && !@conf[:ddl].empty?
+      need_create = (!File.exist?(@conf[:file]) && !@conf[:ddl].empty?)
       @conn = SQLite3::Database.new @conf[:file]
-      if create? then
+      if need_create then
         db.execute @conf[:ddl]
       end
     end
